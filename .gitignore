@@ -1,0 +1,9 @@
+Lab2ApplicationLayer.pdf
+tools/
+.local/
+evidence/
+*.docx
+__pycache__/
+.DS_Store
+build_lab2_report.py
+STATUS.md
