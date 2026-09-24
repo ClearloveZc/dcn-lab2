@@ -56,7 +56,34 @@ On September 23, 2026 (America/New_York), the ARM64 image ran successfully in Do
 
 The multi-platform image was published to Docker Hub, and the Kubernetes Deployment successfully rolled out with `imagePullPolicy: Always`, verifying registry access. Source repository: https://github.com/ClearloveZc/dcn-lab2
 
-Public-cloud deployment is still pending. No public-cloud deployment is claimed.
+On September 24, 2026, the same application was also deployed on AWS EC2 in
+Ohio (`us-east-2`) using Ubuntu 24.04.4 LTS and K3s v1.36.4+k3s1. The instance
+was a `t3.small` with 2 vCPUs, 2 GiB memory, and a 12 GiB gp3 disk. K3s provided
+a single-node Kubernetes control plane and worker. The node was Ready, the
+Deployment had 1/1 available replicas, and its Pod was Running without restarts.
+
+The security group exposed only TCP 30080 for the application. Two requests
+to the public NodePort returned HTTP 200, `text/plain`, `Cache-Control: no-store`,
+and different current UTC timestamps. A real Chrome visit also displayed the
+live response. The cloud instance is temporary and is stopped after evidence
+collection; this repository does not provide a permanent live endpoint.
+
+## Reproduce the cloud deployment
+
+On a Linux VM with K3s installed from https://docs.k3s.io/quick-start:
+
+```sh
+sudo k3s kubectl apply -f kubernetes.yaml
+sudo k3s kubectl set image deployment/sample-time-app \
+  sample-time-app=docker.io/leonchai/sample-time-app@sha256:840b7e8d4d782fd1d92abdac4271604f18af511ff5eb03bef57c4e9fc03eafbf
+sudo k3s kubectl rollout status deployment/sample-time-app
+sudo k3s kubectl get nodes,pods,deployments,services -o wide
+curl http://PUBLIC_NODE_IP:30080/time
+```
+
+Allow inbound TCP 30080 in the VM firewall/security group for the required
+clients. Keep administrative ports private. Stop and then remove temporary
+cloud resources when the experiment is finished to avoid ongoing charges.
 
 ## Stop local resources
 
